@@ -1,0 +1,479 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "toc_visible": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "37puETfgRzzg"
+      },
+      "source": [
+        "# Data Preprocessing Tools"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "EoRP98MpR-qj"
+      },
+      "source": [
+        "## Importing the libraries"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import numpy as np\n",
+        "import matplotlib.pyplot as plt\n",
+        "import pandas as pd"
+      ],
+      "metadata": {
+        "id": "QWzvUGjbF_LI"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "RopL7tUZSQkT"
+      },
+      "source": [
+        "## Importing the dataset"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "dataset = pd.read_csv('Data.csv')\n",
+        "#x is matrix of features\n",
+        "#y is dependent variable vector\n",
+        "x = dataset.iloc[ : , : -1].values\n",
+        "y = dataset.iloc[ : , -1].values \n",
+        "print(x)\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "eiZc-2GnGorq",
+        "outputId": "4dec74bd-0d24-4767-840a-a571ab1fc1d6"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "[['France' 44.0 72000.0]\n",
+            " ['Spain' 27.0 48000.0]\n",
+            " ['Germany' 30.0 54000.0]\n",
+            " ['Spain' 38.0 61000.0]\n",
+            " ['Germany' 40.0 nan]\n",
+            " ['France' 35.0 58000.0]\n",
+            " ['Spain' nan 52000.0]\n",
+            " ['France' 48.0 79000.0]\n",
+            " ['Germany' 50.0 83000.0]\n",
+            " ['France' 37.0 67000.0]]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(y)"
+      ],
+      "metadata": {
+        "id": "dRQK6KMTM3uM",
+        "outputId": "b4a4adba-3341-4a89-9f60-54348944c143",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "['No' 'Yes' 'No' 'No' 'Yes' 'Yes' 'No' 'Yes' 'No' 'Yes']\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "nhfKXNxlSabC"
+      },
+      "source": [
+        "## Taking care of missing data"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#impute module from sklearn from that module we imorted simpleimputer class\n",
+        "from sklearn.impute import SimpleImputer \n",
+        "\n",
+        "#creating an oject called imputer becoz we need to fill the missing values by using it\n",
+        "\n",
+        "imputer = SimpleImputer(missing_values=np.nan , strategy ='mean')\n",
+        "\n",
+        "#imputer is just an object so we nned to connect it to matrix of features\n",
+        "#fit method is used to connect(is it will look at the missing values  and also it will compute the average)\n",
+        "#to do the replacement we use another method called transform\n",
+        "\n",
+        "imputer.fit(x[ : , 1:3])\n",
+        "\n",
+        "#imputer.transform(x[ : , 1:3] it will return the data by filling the missing values\n",
+        "\n",
+        "x[ : , 1:3]=imputer.transform(x[ : , 1:3])\n",
+        "print(x)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "lNgCxiQVJbqY",
+        "outputId": "24ff1eff-a011-4212-d3c5-4625300ec245"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "[['France' 44.0 72000.0]\n",
+            " ['Spain' 27.0 48000.0]\n",
+            " ['Germany' 30.0 54000.0]\n",
+            " ['Spain' 38.0 61000.0]\n",
+            " ['Germany' 40.0 63777.77777777778]\n",
+            " ['France' 35.0 58000.0]\n",
+            " ['Spain' 38.77777777777778 52000.0]\n",
+            " ['France' 48.0 79000.0]\n",
+            " ['Germany' 50.0 83000.0]\n",
+            " ['France' 37.0 67000.0]]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "CriG6VzVSjcK"
+      },
+      "source": [
+        "## Encoding categorical data"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#we use onehotencoder because it has several categories \n",
+        "#tranforming the columns into vectors simply categorical data into numerical data(dataset has three columns so divided into three)\n",
+        "#encoding independent variable\n",
+        "from sklearn.compose import ColumnTransformer\n",
+        "from sklearn.preprocessing import OneHotEncoder \n",
+        "#we have to enter two arguments.So these two arguments are first transformers,where we will specify,what kind of transformation we want to do and on which indexes of the columns we want to transform.And the second argument is remainder which will specify that we actually want to keep the columns that won't be applied some transformations\n",
+        "#first element in transformers is encoding and class name called onehotencoder, [0] (note:in our data set 1 first column we want to transfer so in python index starts with 0) is index of first column which we want to transform the categorical data into vector or numeric.\n",
+        "#passthrough, and which is a code name that will say that we indeed want to keep the columns that won't be applied some transformation that won't be one hot encoded Which are of course age and salary. If we don't include this remainder equals passthrough here.Then when we apply the transformation on X we will only keep, you know the first three columns resulting from one hot encoding.\n",
+        "ct = ColumnTransformer(transformers=[('encoder', OneHotEncoder(),[0])], remainder='passthrough')\n",
+        "#now we need to coonect  matrix of features of x to ct object & update the x (note fit_transform method doesnt return the output as numpy array but we should get as numpy array only, so add np.array(). in future we use train model its exects the matrix of features as numpy array)\n",
+        "x = np.array(ct.fit_transform(x))\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "dUP9RQ1eV7X4"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(x)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "s1OHGvW5gocv",
+        "outputId": "08d7fb87-7fc6-4ab3-983c-a87845c9ef0e"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "[[1.0 0.0 0.0 44.0 72000.0]\n",
+            " [0.0 0.0 1.0 27.0 48000.0]\n",
+            " [0.0 1.0 0.0 30.0 54000.0]\n",
+            " [0.0 0.0 1.0 38.0 61000.0]\n",
+            " [0.0 1.0 0.0 40.0 63777.77777777778]\n",
+            " [1.0 0.0 0.0 35.0 58000.0]\n",
+            " [0.0 0.0 1.0 38.77777777777778 52000.0]\n",
+            " [1.0 0.0 0.0 48.0 79000.0]\n",
+            " [0.0 1.0 0.0 50.0 83000.0]\n",
+            " [1.0 0.0 0.0 37.0 67000.0]]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#encoding dependent variable\n",
+        "#we use label encoding because it has two classes only \n",
+        "from sklearn.preprocessing import LabelEncoder\n",
+        "le = LabelEncoder()\n",
+        "y=le.fit_transform(y)"
+      ],
+      "metadata": {
+        "id": "mVOka_HrgoUL"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(y)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "WFru7vRPiioz",
+        "outputId": "d77c59d9-e137-40b0-b370-75a16ff53898"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "[0 1 0 0 1 1 0 1 0 1]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "qb_vcgm3qZKW"
+      },
+      "source": [
+        "## Splitting the dataset into the Training set and Test set"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#here we need to create pair of features of matrix for the test n train set\n",
+        "from sklearn.model_selection import train_test_split\n",
+        "#X train,the matrix of features of the training set,therefore containing all the countries, one hot encoded,ages, and salaries, of the training set.So X train.Then X test, the matrix of features of the test set.Then Y train, which is the dependent variable of the training set, meaning all the purchase decisions of the customers in the training set, Y train.And then Y test, which same, contains all the purchase decisions of the customers in the test set.\n",
+        "x_train , x_test ,y_train , y_test = train_test_split(x , y , test_size=0.2 , random_state=1)"
+      ],
+      "metadata": {
+        "id": "-89Ye-tmmQXK"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(x_train)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "CUo-fONetlG0",
+        "outputId": "40e6c1d9-be24-423d-ced7-86afc32b2333"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "[[0.0 0.0 1.0 38.77777777777778 52000.0]\n",
+            " [0.0 1.0 0.0 40.0 63777.77777777778]\n",
+            " [1.0 0.0 0.0 44.0 72000.0]\n",
+            " [0.0 0.0 1.0 38.0 61000.0]\n",
+            " [0.0 0.0 1.0 27.0 48000.0]\n",
+            " [1.0 0.0 0.0 48.0 79000.0]\n",
+            " [0.0 1.0 0.0 50.0 83000.0]\n",
+            " [1.0 0.0 0.0 35.0 58000.0]]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(x_test)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "2rgcsqiOtsDN",
+        "outputId": "cd37d771-e365-4502-9256-74d52f35b533"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "[[0.0 1.0 0.0 30.0 54000.0]\n",
+            " [1.0 0.0 0.0 37.0 67000.0]]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(y_train)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "18dlMC4ItvGZ",
+        "outputId": "92aa6119-9be8-4627-d18d-f65b9c0ef353"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "[0 1 0 0 1 1 0 1]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(y_test)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "f3j-_ywMtzCs",
+        "outputId": "b30e90f4-d6d4-433e-e22f-9db6c6c7c654"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "[0 1]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "TpGqbS4TqkIR"
+      },
+      "source": [
+        "## Feature Scaling"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#normalisation is recomended when you have normal distribution , standardisation works all the time\n",
+        "#we are stadardisation\n",
+        "from sklearn.preprocessing import StandardScaler\n",
+        "sc = StandardScaler()\n",
+        "#we apply standardisation  on features only not on dummy variables(first coloumn[0])\n",
+        "#fit will only do mean & standard of all the values and need to transform the \n",
+        "x_train[:, 3:] = sc.fit_transform(x_train[ : , 3 :])\n",
+        "#if we apply fit_transform method to the x_test it will get a new scaler but that is not we needed\n",
+        "x_test[:, 3:] = sc.transform(x_test[ : , 3 :])"
+      ],
+      "metadata": {
+        "id": "HofNwuH_uhDx"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(x_train)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "_ci-mV7O3zT_",
+        "outputId": "22c4c36e-8d07-4b9d-b0f8-22940e9e7574"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "[[0.0 0.0 1.0 -0.19159184384578545 -1.0781259408412425]\n",
+            " [0.0 1.0 0.0 -0.014117293757057777 -0.07013167641635372]\n",
+            " [1.0 0.0 0.0 0.566708506533324 0.633562432710455]\n",
+            " [0.0 0.0 1.0 -0.30453019390224867 -0.30786617274297867]\n",
+            " [0.0 0.0 1.0 -1.9018011447007988 -1.420463615551582]\n",
+            " [1.0 0.0 0.0 1.1475343068237058 1.232653363453549]\n",
+            " [0.0 1.0 0.0 1.4379472069688968 1.5749910381638885]\n",
+            " [1.0 0.0 0.0 -0.7401495441200351 -0.5646194287757332]]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(x_test)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "fD_bSchY3-Tg",
+        "outputId": "a3c402a3-db2e-47ad-8cc6-fb9fe6fac769"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "[[0.0 1.0 0.0 -1.4661817944830124 -0.9069571034860727]\n",
+            " [1.0 0.0 0.0 -0.44973664397484414 0.2056403393225306]]\n"
+          ]
+        }
+      ]
+    }
+  ]
+}
